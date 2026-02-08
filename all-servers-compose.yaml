@@ -1,0 +1,61 @@
+# Custom Docker network definitions
+networks:
+  # VCCT-NET Docker network
+  vcct-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.8.0/24
+          gateway: 192.168.8.1
+
+services:
+  # DHCP server
+  dhcp-server:
+    container_name: dhcp-server
+    image: damithbandara/vcct-dhcp-server:v1
+    hostname: dhcp-server.vcct.com
+    networks:
+      vcct-net:
+        ipv4_address: 192.168.8.120
+    ports:
+      - "67:67/udp"
+    # give low level network privileges
+    cap_add:
+      - NET_ADMIN
+    restart: always
+
+  # DNS server
+  dns-server:
+    container_name: dns-server
+    image: damithbandara/vcct-dns-server:v1
+    hostname: dns-server.vcct.com
+    mac_address: 02:42:c0:a8:79:96
+    networks:
+      vcct-net:
+        ipv4_address: 192.168.8.132
+    ports:
+      - "53:53/udp"
+      - "68:68/udp"
+    restart: always
+
+  # Proxy server
+  proxy-server:
+    container_name: proxy-server
+    image: damithbandara/vcct-proxy-server:v1
+    hostname: proxy-server.vcct.com
+    networks:
+      vcct-net:
+        ipv4_address: 192.168.8.100
+    ports:
+      - "3128:3128"
+    deploy:
+      resources:
+        # set resource limitations to minimize overutilization
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        # set resource reservations for smooth performance
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    restart: always
