@@ -1,0 +1,9 @@
+zone "vcct.com" {
+	type master;
+	file "/etc/bind/db.vcct.com";
+};
+
+zone "8.168.192.in-addr.arpa" {
+	type master;
+	file "/etc/bind/db.8.168.192";
+};
